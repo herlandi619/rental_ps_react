@@ -8,7 +8,7 @@
         body {
             font-family: DejaVu Sans, sans-serif;
             font-size: 12px;
-        }
+        } 
 
         .header {
             border-bottom: 3px solid #000;
@@ -100,7 +100,7 @@
     <tbody>
         @foreach($transactions as $trx)
 
-        @php
+        {{-- @php
     $mulai = \Carbon\Carbon::parse($trx->booking->jam_mulai);
     $selesai = \Carbon\Carbon::parse($trx->booking->jam_selesai);
 
@@ -109,7 +109,26 @@
 
     // konversi ke jam & bulatkan ke atas
     $durasi = ceil($menit / 60);
+@endphp --}}
+
+        @php
+$mulai = \Carbon\Carbon::parse(
+    $trx->booking->tanggal.' '.$trx->booking->jam_mulai
+);
+
+$selesai = \Carbon\Carbon::parse(
+    $trx->booking->tanggal.' '.$trx->booking->jam_selesai
+);
+
+// 🔥 HANDLE LEWAT TENGAH MALAM
+if ($selesai->lessThan($mulai)) {
+    $selesai->addDay();
+}
+
+$menit  = $mulai->diffInMinutes($selesai);
+$durasi = ceil($menit / 60);
 @endphp
+
 
         <tr>
             <td>

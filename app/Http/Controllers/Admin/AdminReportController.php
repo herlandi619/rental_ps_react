@@ -22,7 +22,7 @@ class AdminReportController extends Controller
                 $q->whereHas('booking.user', function($qq) use ($search){
                     $qq->where('name','like',"%$search%");
                 });
-            })
+            }) 
             ->latest()
             ->paginate(5)
             ->withQueryString();
@@ -69,4 +69,4 @@ class AdminReportController extends Controller
 
             return $pdf->download('laporan-transaksi.pdf');
         }
-    }
+}

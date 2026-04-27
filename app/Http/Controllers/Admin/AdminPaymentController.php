@@ -8,7 +8,7 @@ use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-
+ 
 class AdminPaymentController extends Controller
 {
      public function index(Request $request)
@@ -39,10 +39,17 @@ class AdminPaymentController extends Controller
         $booking = $trx->booking;
         $psUnit = $booking->psUnit;
 
-        $start = Carbon::parse($booking->jam_mulai);
-        $end = Carbon::parse($booking->jam_selesai);
+        // 🔥 gabung tanggal + jam (WAJIB)
+        $start = Carbon::parse($booking->tanggal.' '.$booking->jam_mulai);
+        $end   = Carbon::parse($booking->tanggal.' '.$booking->jam_selesai);
 
-        $durasiJam = $start->diffInHours($end);
+        // 🔥 handle lewat tengah malam
+        if ($end->lessThan($start)) {
+            $end->addDay();
+        }
+
+        // hitung durasi real
+        $durasiJam = ceil($start->diffInMinutes($end) / 60);
 
         if ($durasiJam < 1) {
             $durasiJam = 1;
@@ -67,17 +74,20 @@ class AdminPaymentController extends Controller
         $booking = $trx->booking;
         $psUnit = $booking->psUnit;
 
-        $start = Carbon::parse($booking->jam_mulai);
-        $end = Carbon::parse($booking->jam_selesai);
+         // 🔥 WAJIB gabung tanggal + jam
+    $start = Carbon::parse($booking->tanggal.' '.$booking->jam_mulai);
+    $end   = Carbon::parse($booking->tanggal.' '.$booking->jam_selesai);
 
-        $durasiJam = $start->diffInHours($end);
+    // 🔥 HANDLE booking lewat tengah malam
+    if ($end->lessThan($start)) {
+        $end->addDay();
+    }
 
-        if ($durasiJam < 1) {
-            $durasiJam = 1;
-        }
+    // 🔥 hitung durasi REAL (dibulatkan ke atas)
+    $durasiJam = ceil($start->diffInMinutes($end) / 60);
 
-        // 🔥 BULATKAN KE RIBUAN KE BAWAH
-        $total = floor(($psUnit->harga_per_jam * $durasiJam) / 1000) * 1000;
+    // 🔥 hitung total & bulatkan ke ribuan
+    $total = floor(($psUnit->harga_per_jam * $durasiJam) / 1000) * 1000;
 
         $trx->update([
             'metode_pembayaran' => 'qris',
