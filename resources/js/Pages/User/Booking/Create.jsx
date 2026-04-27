@@ -1,5 +1,7 @@
 import UserLayout from "@/Layouts/UserLayout";
-import { useForm, Link } from "@inertiajs/react";
+import { useForm, Link, usePage } from "@inertiajs/react";
+import Swal from "sweetalert2";
+import { useEffect } from "react";
 
 export default function Create({ ps }) {
 
@@ -14,6 +16,26 @@ export default function Create({ ps }) {
         e.preventDefault();
         post(route("user.booking.store"));
     }
+
+    const { flash } = usePage().props;
+
+    useEffect(() => {
+        if (flash.success) {
+            Swal.fire("Berhasil 🎉", flash.success, "success");
+
+            // 🔥 reset form setelah booking berhasil
+            setData({
+                ps_id: ps.id,
+                tanggal: "",
+                jam_mulai: "",
+                durasi: 1,
+            });
+        }
+
+        if (flash.error) {
+            Swal.fire("Gagal ❌", flash.error, "error");
+        }
+    }, [flash]);
  
     return (
         <UserLayout>
