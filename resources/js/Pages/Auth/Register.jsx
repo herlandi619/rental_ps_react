@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 export default function Register() {
     const { flash } = usePage().props; // ambil flash dari backend
 
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
         password: '',
@@ -14,9 +14,14 @@ export default function Register() {
     });
 
     const submit = (e) => {
-        e.preventDefault();
-        post(route('register'));
-    };
+    e.preventDefault();
+
+    post(route('register'), {
+        onSuccess: () => {
+            reset(); // 🔥 kosongkan form setelah sukses
+        }
+    });
+};
 
     // 🔥 Sweet Alert ketika register sukses
     useEffect(() => {
